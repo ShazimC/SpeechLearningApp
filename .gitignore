@@ -16,3 +16,4 @@ build/
 web-build/
 sshack2020.xcworkspace
 Podfile.lock
+node_modules
