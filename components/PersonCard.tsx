@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system"
 import { RecordingOptions } from "expo-av/build/Audio";
 import React, { useEffect, useState } from "react";
 import {
@@ -115,11 +116,6 @@ const PersonCard = ({ person }: { person: Person }) => {
         // location of the recording, to be used to upload
         // const source = latestRecording?.getURI();
         // console.log(source);
-        await latestRecording
-          ?.createNewLoadedSoundAsync()
-          .then(async (val: any) => {
-            await val.sound.playAsync();
-          });
         console.log((await latestRecording?.getStatusAsync())?.durationMillis);
       } catch (err) {
         console.log(err);
@@ -127,10 +123,49 @@ const PersonCard = ({ person }: { person: Person }) => {
     }
   };
 
+  const playRecording = async () => {
+    await latestRecording
+      ?.createNewLoadedSoundAsync()
+      .then(async (val: any) => {
+        await val.sound.playAsync();
+      });
+  }
+
+  const sendRecording = async () => {
+    // sending wav file here to machine learning api
+    // expecting text back as response
+    const fileUri = latestRecording?._uri == undefined ? "" : latestRecording?._uri;
+    console.log(fileUri);
+    // let formData = new FormData();
+    // formData.append("wavFile", uri)
+    // let requestOptions: RequestInit = {
+    //   method: "POST",
+    //   body: formData,
+    //   redirect: "follow"
+    // }
+    // try {
+    //   fetch("https://stark-ravine-42131.herokuapp.com/predict", requestOptions)
+    //     .then(res => res.text())
+    //     .then(result => console.log(result))
+    //     .catch(err => console.log(err))
+    // } catch (err) {
+    //   console.log(err)
+    // }
+    const apiUrl: string = "https://stark-ravine-42131.herokuapp.com/predict";
+    
+    await FileSystem.uploadAsync(apiUrl, fileUri, {
+      httpMethod: 'POST',
+    }).then(res => {
+      console.log(res.status)
+      console.log(res.body)
+    }).catch(err => console.log(err))
+  }
+
   const resetRecording = () => {
     setLatestRecording(undefined);
     setDuration("00.000");
   };
+
   return (
     <View style={styles.card}>
       <Modal transparent visible={newWordModalVisible} animationType="slide">
@@ -289,30 +324,52 @@ const PersonCard = ({ person }: { person: Person }) => {
             </Text>
           </View>
           {latestRecording?._isDoneRecording ? (
-            <TouchableOpacity
-              style={[
-                styles.button,
-                {
-                  backgroundColor: "#00bb9e",
-                  margin: 20,
-                  marginTop: 0,
-                },
-              ]}
-              onPress={() => {
-                //make request
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontWeight: "500",
-                  fontSize: 16,
-                  textAlign: "center",
-                }}
+            <>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: "#00bb9e",
+                    margin: 20,
+                    marginTop: 0,
+                  },
+                ]}
+                onPress={sendRecording}
               >
-                Translate
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "500",
+                    fontSize: 16,
+                    textAlign: "center",
+                  }}
+                >
+                  Translate
               </Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: "black",
+                    margin: 20,
+                    marginTop: 0,
+                  },
+                ]}
+                onPress={playRecording}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "500",
+                    fontSize: 16,
+                    textAlign: "center",
+                  }}
+                >
+                  Play Recording
+              </Text>
+              </TouchableOpacity>
+            </>
           ) : null}
 
           <TouchableOpacity
@@ -334,7 +391,7 @@ const PersonCard = ({ person }: { person: Person }) => {
                 textAlign: "center",
               }}
             >
-              {isRecording ? "Stop" : "Listen"}
+              {isRecording ? "Stop" : latestRecording?._isDoneRecording ? "Re-Listen" : "Listen"}
             </Text>
           </TouchableOpacity>
         </>

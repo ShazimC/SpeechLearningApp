@@ -14,7 +14,7 @@ import {
 import { Person } from "./types";
 import PersonCard from "./components/PersonCard";
 
-/*
+/*≠
   TO DO:
   - I should be able to add a new person
   - I should be able to add recordings specific to that person's collection
@@ -169,25 +169,6 @@ export default function App() {
           <PersonCard person={person} key={index} />
         ))}
       </ScrollView>
-
-      {/* <Text style={{ fontSize: 27.5, fontWeight: "500", margin: 7.5 }}>
-        {duration}
-      </Text>
-      <TouchableOpacity
-        style={[
-          {
-            backgroundColor: "#ed5564",
-            padding: 15,
-            borderRadius: 100,
-            marginBottom: 20,
-          },
-        ]}
-        onPress={isRecording ? stopRecording : startRecording}
-      >
-        <Text style={{ textAlign: "center", fontSize: 55 }}>
-          {isRecording ? "✋" : "🎙"}
-        </Text>
-      </TouchableOpacity> */}
       <StatusBar style="auto" />
     </SafeAreaView>
   );
