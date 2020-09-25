@@ -33,11 +33,11 @@ export default function App() {
     {
       name: "Charlie",
       collections: [
-        { label: "Food", recordings: [] },
-        { label: "Homework", recordings: [] },
-        { label: "Class", recordings: [] },
+        { label: "Bed", recordings: [] },
+        { label: "Bird", recordings: [] },
+        { label: "Cat", recordings: [] },
+        { label: "Down", recordings: [] },
         { label: "Dog", recordings: [] },
-        { label: "School", recordings: [] },
       ],
     },
     {

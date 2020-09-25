@@ -12,6 +12,7 @@ import {
   Modal,
   TextInput,
   Button,
+  ActivityIndicator,
 } from "react-native";
 import { Collection, Person } from "../types";
 var Duration = require("duration");
@@ -48,6 +49,8 @@ const PersonCard = ({ person }: { person: Person }) => {
     false
   );
   const [newWord, setNewWord] = useState<string>("");
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [match, setMatch] = useState<string>();
 
   useEffect(() => {
     setName(person.name);
@@ -134,31 +137,21 @@ const PersonCard = ({ person }: { person: Person }) => {
   const sendRecording = async () => {
     // sending wav file here to machine learning api
     // expecting text back as response
+    setIsTranslating(true);
     const fileUri = latestRecording?._uri == undefined ? "" : latestRecording?._uri;
     console.log(fileUri);
-    // let formData = new FormData();
-    // formData.append("wavFile", uri)
-    // let requestOptions: RequestInit = {
-    //   method: "POST",
-    //   body: formData,
-    //   redirect: "follow"
-    // }
-    // try {
-    //   fetch("https://stark-ravine-42131.herokuapp.com/predict", requestOptions)
-    //     .then(res => res.text())
-    //     .then(result => console.log(result))
-    //     .catch(err => console.log(err))
-    // } catch (err) {
-    //   console.log(err)
-    // }
     const apiUrl: string = "https://stark-ravine-42131.herokuapp.com/predict";
-    
+
     await FileSystem.uploadAsync(apiUrl, fileUri, {
       httpMethod: 'POST',
     }).then(res => {
       console.log(res.status)
       console.log(res.body)
+      setMatch(""+res.status)
     }).catch(err => console.log(err))
+      .finally(() => {
+        setIsTranslating(false)
+      })
   }
 
   const resetRecording = () => {
@@ -311,30 +304,18 @@ const PersonCard = ({ person }: { person: Person }) => {
               </TouchableOpacity>
             ))}
           </ScrollView>
-          <View>
-            <Text
-              style={{
-                fontSize: 27.5,
-                fontWeight: "500",
-                margin: 7.5,
-                textAlign: "center",
-              }}
-            >
-              {duration}
-            </Text>
-          </View>
-          {latestRecording?._isDoneRecording ? (
-            <>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 12.5 }}>
+            {match ? <>
               <TouchableOpacity
                 style={[
                   styles.button,
                   {
-                    backgroundColor: "#00bb9e",
+                    backgroundColor: "#ed5564",
                     margin: 20,
                     marginTop: 0,
                   },
                 ]}
-                onPress={sendRecording}
+                onPress={() => {}}
               >
                 <Text
                   style={{
@@ -344,8 +325,77 @@ const PersonCard = ({ person }: { person: Person }) => {
                     textAlign: "center",
                   }}
                 >
-                  Translate
+                  No
               </Text>
+              </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 27.5,
+                  fontWeight: "500",
+                  margin: 7.5,
+                  textAlign: "center",
+                }}
+              >
+                {match}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: "#00bb9e",
+                    margin: 20,
+                    marginTop: 0,
+                  },
+                ]}
+                onPress={() => {}}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontWeight: "500",
+                    fontSize: 16,
+                    textAlign: "center",
+                  }}
+                >
+                  Yes
+              </Text>
+              </TouchableOpacity>
+            </> :
+              <Text
+                style={{
+                  fontSize: 27.5,
+                  fontWeight: "500",
+                  margin: 7.5,
+                  textAlign: "center",
+                }}
+              >
+                {duration}
+              </Text>}
+          </View>
+          {latestRecording?._isDoneRecording ? (
+            <>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    margin: 20,
+                    marginTop: 0,
+                  },
+                ]}
+                onPress={sendRecording}
+              >
+                {isTranslating ?
+                  <ActivityIndicator size="small" color="white" /> :
+                  <Text
+                    style={{
+                      color: "white",
+                      fontWeight: "500",
+                      fontSize: 16,
+                      textAlign: "center",
+                    }}
+                  >
+                    Translate
+              </Text>}
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
